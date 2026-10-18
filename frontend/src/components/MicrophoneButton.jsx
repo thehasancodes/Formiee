@@ -2,24 +2,44 @@ import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone, faMicrophoneSlash } from "@fortawesome/free-solid-svg-icons";
 
-export default function MicrophoneButton({ onTranscript }) {
+const microphoneLabels = {
+  en: {
+    unsupported: "Voice input is not supported in this browser",
+    start: "Start voice input",
+    stop: "Stop voice input",
+  },
+  bn: {
+    unsupported: "এই ব্রাউজারে ভয়েস ইনপুট সমর্থিত নয়",
+    start: "ভয়েস ইনপুট শুরু করুন",
+    stop: "ভয়েস ইনপুট বন্ধ করুন",
+  },
+  hi: {
+    unsupported: "इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है",
+    start: "वॉइस इनपुट शुरू करें",
+    stop: "वॉइस इनपुट बंद करें",
+  },
+};
+
+export default function MicrophoneButton({ language, onTranscript }) {
   const recognitionRef = useRef(null);
   const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
+  const [isSupported] = useState(
+    () => Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
+  );
+  const labels = microphoneLabels[language.split("-")[0]] || microphoneLabels.en;
 
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      setIsSupported(false);
       return undefined;
     }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = false;
-    recognition.lang = "en-US";
+    recognition.lang = language;
 
     recognition.onresult = (event) => {
       const transcript = Array.from(event.results)
@@ -40,7 +60,7 @@ export default function MicrophoneButton({ onTranscript }) {
       recognition.abort();
       recognitionRef.current = null;
     };
-  }, [onTranscript]);
+  }, [language, onTranscript]);
 
   const toggleListening = () => {
     if (!isSupported) {
@@ -62,17 +82,17 @@ export default function MicrophoneButton({ onTranscript }) {
       className={`microphone-button ${isListening ? "is-listening" : ""}`}
       aria-label={
         !isSupported
-          ? "Voice input is not supported in this browser"
+          ? labels.unsupported
           : isListening
-            ? "Stop voice input"
-            : "Start voice input"
+            ? labels.stop
+            : labels.start
       }
       title={
         !isSupported
-          ? "Voice input is not supported in this browser"
+          ? labels.unsupported
           : isListening
-            ? "Stop voice input"
-            : "Start voice input"
+            ? labels.stop
+            : labels.start
       }
       disabled={!isSupported}
       onClick={toggleListening}

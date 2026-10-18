@@ -1,7 +1,108 @@
 import { useCallback, useState } from "react";
 import MicrophoneButton from "./MicrophoneButton";
 
-export default function ContactForm() {
+const translations = {
+  en: {
+    eyebrow: "GET IN TOUCH",
+    title: "Contact Us",
+    description: "Send us a message and we will get back to you.",
+    voiceInput: "Voice input",
+    change: "Change",
+    firstName: "First Name",
+    lastName: "Last Name",
+    email: "Email Address",
+    phone: "Phone Number",
+    message: "Your Message",
+    firstNamePlaceholder: "John",
+    lastNamePlaceholder: "Doe",
+    messagePlaceholder: "Write your message here",
+    missingFirstName: "Please provide your first name.",
+    missingLastName: "Please provide your last name.",
+    missingEmail: "Please provide your email address.",
+    invalidEmail: "Please provide a valid email address.",
+    missingPhone: "Please provide your phone number.",
+    missingMessage: "Please enter your message.",
+    sending: "Sending...",
+    submit: "Send Message",
+    waiting: "Please wait...",
+    sent: "Message sent successfully!",
+    failed: "Failed to send message.",
+    error: "Something went wrong!",
+    english: "English",
+    bengali: "Bengali",
+    hindi: "Hindi",
+  },
+  bn: {
+    eyebrow: "যোগাযোগ করুন",
+    title: "আমাদের সাথে যোগাযোগ করুন",
+    description: "আমাদের একটি বার্তা পাঠান, আমরা আপনার সাথে যোগাযোগ করব।",
+    voiceInput: "ভয়েস ইনপুট",
+    change: "পরিবর্তন করুন",
+    firstName: "নামের প্রথম অংশ",
+    lastName: "নামের শেষ অংশ",
+    email: "ইমেইল ঠিকানা",
+    phone: "ফোন নম্বর",
+    message: "আপনার বার্তা",
+    firstNamePlaceholder: "আপনার নামের প্রথম অংশ",
+    lastNamePlaceholder: "আপনার নামের শেষ অংশ",
+    messagePlaceholder: "এখানে আপনার বার্তা লিখুন",
+    missingFirstName: "আপনার নামের প্রথম অংশ লিখুন।",
+    missingLastName: "আপনার নামের শেষ অংশ লিখুন।",
+    missingEmail: "আপনার ইমেইল ঠিকানা লিখুন।",
+    invalidEmail: "সঠিক ইমেইল ঠিকানা লিখুন।",
+    missingPhone: "আপনার ফোন নম্বর লিখুন।",
+    missingMessage: "আপনার বার্তা লিখুন।",
+    sending: "পাঠানো হচ্ছে...",
+    submit: "বার্তা পাঠান",
+    waiting: "অনুগ্রহ করে অপেক্ষা করুন...",
+    sent: "বার্তা সফলভাবে পাঠানো হয়েছে!",
+    failed: "বার্তা পাঠানো যায়নি।",
+    error: "একটি সমস্যা হয়েছে!",
+    english: "ইংরেজি",
+    bengali: "বাংলা",
+    hindi: "হিন্দি",
+  },
+  hi: {
+    eyebrow: "संपर्क करें",
+    title: "हमसे संपर्क करें",
+    description: "हमें संदेश भेजें, हम आपसे जल्द संपर्क करेंगे।",
+    voiceInput: "वॉइस इनपुट",
+    change: "बदलें",
+    firstName: "पहला नाम",
+    lastName: "उपनाम",
+    email: "ईमेल पता",
+    phone: "फ़ोन नंबर",
+    message: "आपका संदेश",
+    firstNamePlaceholder: "आपका पहला नाम",
+    lastNamePlaceholder: "आपका उपनाम",
+    messagePlaceholder: "यहाँ अपना संदेश लिखें",
+    missingFirstName: "कृपया अपना पहला नाम लिखें।",
+    missingLastName: "कृपया अपना उपनाम लिखें।",
+    missingEmail: "कृपया अपना ईमेल पता लिखें।",
+    invalidEmail: "कृपया मान्य ईमेल पता लिखें।",
+    missingPhone: "कृपया अपना फ़ोन नंबर लिखें।",
+    missingMessage: "कृपया अपना संदेश लिखें।",
+    sending: "भेजा जा रहा है...",
+    submit: "संदेश भेजें",
+    waiting: "कृपया प्रतीक्षा करें...",
+    sent: "संदेश सफलतापूर्वक भेजा गया!",
+    failed: "संदेश नहीं भेजा जा सका।",
+    error: "कुछ गड़बड़ हो गई!",
+    english: "अंग्रेज़ी",
+    bengali: "बंगाली",
+    hindi: "हिंदी",
+  },
+};
+
+export default function ContactForm({ language, languageName, onChangeLanguage }) {
+  const copy = translations[language.split("-")[0]] || translations.en;
+  const localizedLanguageName = {
+    English: copy.english,
+    Bengali: copy.bengali,
+    Hindi: copy.hindi,
+  }[languageName] || languageName;
+  const fieldLabel = (english, translated) =>
+    language.startsWith("en") ? english : `${english} / ${translated}`;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -42,7 +143,7 @@ export default function ContactForm() {
     }
 
     setIsSubmitting(true);
-    setStatus({ message: "Please wait...", type: "loading" });
+    setStatus({ message: copy.waiting, type: "loading" });
 
     try {
       const response = await fetch(
@@ -64,7 +165,7 @@ export default function ContactForm() {
 
       if (response.ok && result.success) {
         setStatus({
-          message: result.message || "Message sent successfully!",
+          message: result.message || copy.sent,
           type: "success",
         });
 
@@ -79,7 +180,7 @@ export default function ContactForm() {
         setWasValidated(false);
       } else {
         setStatus({
-          message: result.message || "Failed to send message.",
+          message: result.message || copy.failed,
           type: "error",
         });
       }
@@ -87,7 +188,7 @@ export default function ContactForm() {
       console.error(error);
 
       setStatus({
-        message: "Something went wrong!",
+        message: copy.error,
         type: "error",
       });
     } finally {
@@ -107,17 +208,25 @@ export default function ContactForm() {
   };
 
   return (
-    <section className="contact-page">
+    <section className="contact-page" lang={language}>
       <div className="contact-card">
-        <MicrophoneButton onTranscript={handleTranscript} />
+        <MicrophoneButton language={language} onTranscript={handleTranscript} />
 
         <header className="contact-header">
-          <span className="contact-eyebrow">GET IN TOUCH</span>
-          <h1>Contact Us</h1>
+          <span className="contact-eyebrow">{copy.eyebrow}</span>
+          <h1>{copy.title}</h1>
 
           <p>
-          Send us a message and we will get back to you.
+            {copy.description}
           </p>
+          <button
+            className="language-change-button"
+            type="button"
+            onClick={onChangeLanguage}
+          >
+            {copy.voiceInput}: {localizedLanguageName}{" "}
+            <span aria-hidden="true">· {copy.change}</span>
+          </button>
         </header>
 
         <form
@@ -128,14 +237,14 @@ export default function ContactForm() {
           <div className="form-row">
             <div className="form-field">
               <label htmlFor="firstName" className="form-label">
-                First Name
+                {fieldLabel("First Name", copy.firstName)}
               </label>
 
               <input
                 type="text"
                 name="firstName"
                 id="firstName"
-                placeholder="John"
+                placeholder={copy.firstNamePlaceholder}
                 required
                 value={formData.firstName}
                 onChange={handleChange}
@@ -143,20 +252,20 @@ export default function ContactForm() {
               />
 
               {wasValidated && !formData.firstName.trim() && (
-                <p className="empty-feedback">Please provide your first name.</p>
+                <p className="empty-feedback">{copy.missingFirstName}</p>
               )}
             </div>
 
             <div className="form-field">
               <label htmlFor="lastName" className="form-label">
-                Last Name
+                {fieldLabel("Last Name", copy.lastName)}
               </label>
 
               <input
                 type="text"
                 name="lastName"
                 id="lastName"
-                placeholder="Doe"
+                placeholder={copy.lastNamePlaceholder}
                 required
                 value={formData.lastName}
                 onChange={handleChange}
@@ -164,7 +273,7 @@ export default function ContactForm() {
               />
 
               {wasValidated && !formData.lastName.trim() && (
-                <p className="empty-feedback">Please provide your last name.</p>
+                <p className="empty-feedback">{copy.missingLastName}</p>
               )}
             </div>
           </div>
@@ -175,7 +284,7 @@ export default function ContactForm() {
                 htmlFor="email"
                 className="form-label"
               >
-                Email Address
+                {fieldLabel("Email Address", copy.email)}
               </label>
 
               <input
@@ -191,7 +300,7 @@ export default function ContactForm() {
 
               {wasValidated && !formData.email.trim() && (
                 <p className="empty-feedback">
-                  Please provide your email address.
+                  {copy.missingEmail}
                 </p>
               )}
 
@@ -199,7 +308,7 @@ export default function ContactForm() {
                 formData.email.trim() &&
                 !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
                   <p className="invalid-feedback">
-                    Please provide a valid email address.
+                    {copy.invalidEmail}
                   </p>
                 )}
             </div>
@@ -209,7 +318,7 @@ export default function ContactForm() {
                 htmlFor="phone"
                 className="form-label"
               >
-                Phone Number
+                {fieldLabel("Phone Number", copy.phone)}
               </label>
 
               <input
@@ -224,9 +333,7 @@ export default function ContactForm() {
               />
 
               {wasValidated && !formData.phone.trim() && (
-                <p className="empty-feedback">
-                  Please provide your phone number.
-                </p>
+                <p className="empty-feedback">{copy.missingPhone}</p>
               )}
             </div>
           </div>
@@ -236,14 +343,14 @@ export default function ContactForm() {
               htmlFor="message"
               className="form-label"
             >
-              Your Message
+              {fieldLabel("Message", copy.message)}
             </label>
 
             <textarea
               rows={5}
               name="message"
               id="message"
-              placeholder="Your Message"
+              placeholder={copy.messagePlaceholder}
               required
               value={formData.message}
               onChange={handleChange}
@@ -252,7 +359,7 @@ export default function ContactForm() {
 
             {wasValidated && !formData.message.trim() && (
               <p className="empty-feedback">
-                Please enter your message.
+                {copy.missingMessage}
               </p>
             )}
           </div>
@@ -262,7 +369,7 @@ export default function ContactForm() {
             disabled={isSubmitting}
             className="submit-button"
           >
-            {isSubmitting ? "Sending..." : "Send Message"}
+            {isSubmitting ? copy.sending : copy.submit}
           </button>
 
           {status.message && (
